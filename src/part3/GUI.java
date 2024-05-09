@@ -19,6 +19,8 @@ public class GUI extends JFrame {
         super("Banking System");
         setLayout(null);
         
+        transferObject = new Transaction();
+        
         sbAllData = new StringBuilder();
         globalAccounts = accounts;
         
