@@ -37,7 +37,7 @@ public class Main {
         GUI gui = new GUI(accounts);
         gui.setVisible(true);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        gui.setSize(1000, 1000);
+        gui.setSize(820, 600);
         
     }
 }
