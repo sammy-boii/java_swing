@@ -53,8 +53,9 @@ public class Main {
       t.transfer(account3, account4, -50);
       t.transfer(account2, account3, 100);
       
-      
-      account1.deposit(-400);
+      System.out.println("Before " + account1.getBalance());
+      account1.deposit('a');
+      System.out.println("After " + account1.getBalance());
       account1.deposit(99999);
       
       account4.withdraw(-50);

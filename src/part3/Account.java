@@ -20,23 +20,23 @@ public class Account extends Customer {
     }
 
     public void deposit(int amount) {
+    
     	if (amount < 0) {
     		System.out.println("Invalid amount! Please try again.");
     	}
         this.balance += amount;
-    }
+    	}
 
     public void withdraw(int amount) {
-		
+    	if (amount < 0) {
+    		System.out.println("Invalid amount! Please try again.");
+    		return;
+    	}
+    	
 	    if (this.getBalance() < amount) {
 	    	System.out.println("Transaction failed: Insufficient balance.");
 	    	return;
 	    } 
-	    
-	    if (amount < 0) {
-	    	System.out.println("Invalid amount! Please try again.");
-	    	return;
-	    }
 	    
         this.balance -= amount;
     }

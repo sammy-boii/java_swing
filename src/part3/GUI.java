@@ -1,9 +1,11 @@
 package part3;
 
 import javax.swing.*;
-
 import java.awt.Font;
 import java.awt.event.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 
 public class GUI extends JFrame {
@@ -23,24 +25,10 @@ public class GUI extends JFrame {
         
         sbAllData = new StringBuilder();
         globalAccounts = accounts;
-        
-        sbAllData.append("<html><style>td, th {padding: 5px 40px;} table {padding: 4px;} body {text-align: left; font-size: 11px;}</style><table>");
-        
-        sbAllData.append("<tr><th>First Name</th><th>Last Name</th><th>Account Number</th><th>Balance</th></tr>");
 
-        for (Account account : globalAccounts) {
-            sbAllData.append("<tr>");
-            sbAllData.append("<td>").append(account.getFirstName()).append("</td>");
-            sbAllData.append("<td>").append(account.getLastName()).append("</td>");
-            sbAllData.append("<td>").append(account.getAccountNum()).append("</td>");
-            sbAllData.append("<td>").append(account.getBalance()).append("</td>");
-            sbAllData.append("</tr>");
-        }
-
-        sbAllData.append("</table></html>");
-
-        showAllData = new JLabel(sbAllData.toString());
-
+        showAllData = new JLabel();
+        showAllData.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        showAllData.setVisible(false); 
         
         showAllButton = new JButton("Show All");
         depositButton = new JButton("Deposit");
@@ -71,7 +59,6 @@ public class GUI extends JFrame {
         showAllButton.setBounds(585, 185, 140, 35); 
 
         showAllData.setBounds(20, 180, 1000, 500);
-
 
         add(showAllData);
         
@@ -145,8 +132,15 @@ public class GUI extends JFrame {
         		        sbAllData.append("</table></html>");
         		        showAllData.setText(sbAllData.toString());
         		        showAllData.setVisible(true); 
-        		       
-        		        repaint();
+        		        
+        		        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/accounts.csv"))) {
+        	                for (Account account : globalAccounts) {
+        	                    writer.write(account.getFirstName() + "," + account.getLastName() + "," + account.getAccountNum() + "," + account.getBalance());
+        	                    writer.newLine();
+        	                }
+        	            } catch (IOException err) {
+        	                err.printStackTrace();
+        	            }
         		    }
         		}
 
@@ -172,6 +166,7 @@ public class GUI extends JFrame {
 
         			    	
         			    	foundAccount.deposit(amount);
+        			    	
         			    	showAllButton.doClick();
         			    	showAllButton.doClick();
         			    	
@@ -207,6 +202,7 @@ public class GUI extends JFrame {
 
         			    	
         			    	foundAccount.withdraw(amount);
+        			    	
         			    	showAllButton.doClick();
         			    	showAllButton.doClick();
         			    	
@@ -249,6 +245,7 @@ public class GUI extends JFrame {
         		        }
 
         		        transferObject.transfer(sourceAccount, targetAccount, amount);
+        		        
         		        showAllButton.doClick();
     			    	showAllButton.doClick();
 
@@ -256,8 +253,6 @@ public class GUI extends JFrame {
         		    } else {
         		        JOptionPane.showMessageDialog(null, "Account not found.");
         		    }
-        		    repaint();
-        		    revalidate();
         		}
 
         	}
