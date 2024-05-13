@@ -102,10 +102,72 @@ public class GUI extends JFrame {
         showAllButton.addActionListener(handler);
         depositButton.addActionListener(handler);
         withdrawButton.addActionListener(handler);
-        transferButton.addActionListener(handler);
+        transferButton.addActionListener(handler);    
+        
+        accDeposit.addFocusListener(handler);
+        accWithdraw.addFocusListener(handler);
+        acc1Transfer.addFocusListener(handler);
+        acc2Transfer.addFocusListener(handler);
+        depositInput.addFocusListener(handler);
+        withdrawInput.addFocusListener(handler);
+        transferAmount.addFocusListener(handler);
     }
 
-    private class HandlerClass implements ActionListener {
+    private class HandlerClass implements ActionListener, FocusListener {
+    	
+    	private void updateTable() {
+	        sbAllData.setLength(0); 
+	        sbAllData.append("<html><style>td, th {padding: 5px 40px;} body {text-align: left; font-size: 11px;}</style><table>");
+	        
+	        sbAllData.append("<tr><th>First Name</th><th>Last Name</th><th>Account Number</th><th>Balance</th></tr>");
+
+	        for (Account account : globalAccounts) {
+	            sbAllData.append("<tr>");
+	            sbAllData.append("<td>").append(account.getFirstName()).append("</td>");
+	            sbAllData.append("<td>").append(account.getLastName()).append("</td>");
+	            sbAllData.append("<td>").append(account.getAccountNum()).append("</td>");
+	            sbAllData.append("<td>").append(account.getBalance()).append("</td>");
+	            sbAllData.append("</tr>");
+	        }
+
+	        sbAllData.append("</table></html>");
+	        showAllData.setText(sbAllData.toString());
+    	}
+    	
+    	
+    	private void updateCSV() {
+    	      try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/accounts.csv"))) {
+	                for (Account account : globalAccounts) {
+	                    writer.write(account.getFirstName() + "," + account.getLastName() + "," + account.getAccountNum() + "," + account.getBalance());
+	                    writer.newLine();
+	                }
+	            } catch (IOException err) {
+	                err.printStackTrace();
+	            }
+    	}
+    	
+    	private Account findAccount(int accNum) {
+    		  for (Account account : globalAccounts) {
+  			    if (account.getAccountNum() == accNum) {
+  			        return account;
+  			    }
+  		  }
+			return null;
+    	}
+    	
+    	@Override 
+        public void focusGained(FocusEvent e) {
+            JTextField textField = (JTextField) e.getSource();
+            textField.selectAll();	
+        }
+    	
+    	@Override 
+    	public void focusLost(FocusEvent e) {
+    		return;
+    	}
+
+
+    	
         @Override
         public void actionPerformed(ActionEvent e) {
         	
@@ -114,47 +176,17 @@ public class GUI extends JFrame {
         		    if (showAllData.isVisible()) {
         		        showAllData.setVisible(false); 
         		    } else {
-
-        		        sbAllData.setLength(0); 
-        		        sbAllData.append("<html><style>td, th {padding: 5px 40px;} body {text-align: left; font-size: 11px;}</style><table>");
-        		        
-        		        sbAllData.append("<tr><th>First Name</th><th>Last Name</th><th>Account Number</th><th>Balance</th></tr>");
-
-        		        for (Account account : globalAccounts) {
-        		            sbAllData.append("<tr>");
-        		            sbAllData.append("<td>").append(account.getFirstName()).append("</td>");
-        		            sbAllData.append("<td>").append(account.getLastName()).append("</td>");
-        		            sbAllData.append("<td>").append(account.getAccountNum()).append("</td>");
-        		            sbAllData.append("<td>").append(account.getBalance()).append("</td>");
-        		            sbAllData.append("</tr>");
-        		        }
-
-        		        sbAllData.append("</table></html>");
-        		        showAllData.setText(sbAllData.toString());
-        		        showAllData.setVisible(true); 
-        		        
-        		        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/accounts.csv"))) {
-        	                for (Account account : globalAccounts) {
-        	                    writer.write(account.getFirstName() + "," + account.getLastName() + "," + account.getAccountNum() + "," + account.getBalance());
-        	                    writer.newLine();
-        	                }
-        	            } catch (IOException err) {
-        	                err.printStackTrace();
-        	            }
+        		    	updateTable();
+        		    	showAllData.setVisible(true); 
         		    }
         		}
 
 
         	  else if (e.getSource() == depositButton) {
+
+        		  int accNum = Integer.parseInt(accDeposit.getText());
         		  
-        		  Account foundAccount = null;
-        		  
-        		  for (Account account : globalAccounts) {
-        			    if (account.getAccountNum() == Integer.parseInt(accDeposit.getText())) {
-        			        foundAccount = account;
-        			        break; 
-        			    }
-        		  }
+        		  Account foundAccount = findAccount(accNum);
         			    
         			    if (foundAccount != null) { 	
         			    	int amount = Integer.parseInt(depositInput.getText());
@@ -164,11 +196,10 @@ public class GUI extends JFrame {
         			    		return;
         			    	}
 
-        			    	
         			    	foundAccount.deposit(amount);
         			    	
-        			    	showAllButton.doClick();
-        			    	showAllButton.doClick();
+        			    	updateTable();
+        			    	updateCSV();
         			    	
         			    	JOptionPane.showMessageDialog(null, "Successfully deposited");
         			    }
@@ -178,14 +209,9 @@ public class GUI extends JFrame {
 
         	  }
         	  else if (e.getSource() == withdrawButton) {
-        		  Account foundAccount = null;
+        		  int accNum = Integer.parseInt(accWithdraw.getText());
         		  
-        		  for (Account account : globalAccounts) {
-        			    if (account.getAccountNum() == Integer.parseInt(accWithdraw.getText())) {
-        			        foundAccount = account;
-        			        break; 
-        			    }
-        		  }
+        		  Account foundAccount = findAccount(accNum);
         			    
         			    if (foundAccount != null) { 	
         			    	int amount = Integer.parseInt(withdrawInput.getText());
@@ -203,8 +229,8 @@ public class GUI extends JFrame {
         			    	
         			    	foundAccount.withdraw(amount);
         			    	
-        			    	showAllButton.doClick();
-        			    	showAllButton.doClick();
+        			    	updateTable();
+        			    	updateCSV();
         			    	
         			    	JOptionPane.showMessageDialog(null, "Successfully withdrawn");
         			    }
@@ -214,22 +240,13 @@ public class GUI extends JFrame {
         	  }
         	  
         	  else if (e.getSource() == transferButton) {
-        		    Account sourceAccount = null;
-        		    Account targetAccount = null;
-
-        		    for (Account account : globalAccounts) {
-        		        if (account.getAccountNum() == Integer.parseInt(acc1Transfer.getText())) {
-        		            sourceAccount = account;
-        		            break;
-        		        }
-        		    }
-
-        		    for (Account account : globalAccounts) {
-        		        if (account.getAccountNum() == Integer.parseInt(acc2Transfer.getText())) {
-        		            targetAccount = account;
-        		            break;
-        		        }
-        		    }
+	
+	      		    int accNum1 = Integer.parseInt(acc1Transfer.getText());
+	      		    int accNum2 = Integer.parseInt(acc2Transfer.getText());
+	      		    
+	      		    Account sourceAccount = findAccount(accNum1);
+	     		    Account targetAccount =  findAccount(accNum2);
+	     		    
 
         		    if (sourceAccount != null && targetAccount != null) {
         		        int amount = Integer.parseInt(transferAmount.getText());
@@ -246,8 +263,8 @@ public class GUI extends JFrame {
 
         		        transferObject.transfer(sourceAccount, targetAccount, amount);
         		        
-        		        showAllButton.doClick();
-    			    	showAllButton.doClick();
+        		        updateTable();
+    			    	updateCSV();
 
         		        JOptionPane.showMessageDialog(null, "Successfully transferred.");
         		    } else {
